@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Gym Exercise Trends — Documentation</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="styles.css">
+  <style>
+ 
+    body { font-family: 'Poppins', sans-serif; padding: 30px; background: #f8fff4; color: #1b5e20; }
+    .doc { max-width: 900px; margin: 0 auto; background: white; padding: 28px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.06);}
+    h1 { font-family: 'Playfair Display', serif; color: #2e7d32; }
+    section { margin-bottom: 22px; }
+    pre { background:#f1f8e9; padding:12px; border-radius:8px; overflow:auto; }
+    .sketch { max-width: 100%; border-radius: 8px; box-shadow: 0 6px 20px rgba(0,0,0,0.06); }
+    .video { text-align:center; margin-top:10px; }
+    .btn { display:inline-block; padding:8px 14px; background:#66bb6a; color:white; border-radius:8px; text-decoration:none; margin-right:8px; }
+  </style>
+</head>
+<body>
+  <div class="doc">
+    <h1>Gym Exercise Trends — Documentation</h1>
+
+    <section>
+      <h2>Project overview</h2>
+      <p>
+        This interactive dashboard explores workout patterns — average calories burned and average maximum BPM — broken down by workout type and gender.
+        It is implemented with D3 v7 and HTML/CSS/JS. The visualization and the documentation are hosted publicly (see deployment section).
+      </p>
+    </section>
+
+    <section>
+      <h2>Dataset</h2>
+      <p>
+        The visualization reads <code>data/gym_members_exercise_tracking.csv</code>. Expected columns:
+        <ul>
+          <li><strong>Workout_Type</strong> (e.g., HIIT, Cardio, Strength, Yoga)</li>
+          <li><strong>Gender</strong> (Male, Female)</li>
+          <li><strong>Calories_Burned</strong> (numeric)</li>
+          <li><strong>Max_BPM</strong> (numeric)</li>
+          <li><strong>Age</strong> (optional, numeric)</li>
+        </ul>
+      </p>
+      <p>Please include the CSV file in <code>/data</code> (relative to index.html) so GitHub Pages can serve it.</p>
+    </section>
+
+    <section>
+      <h2>Design process</h2>
+      <ol>
+        <li>Reviewed Kaggle datasets and became interested in gym datasets: <em>How do workout intensity and calorie burn differ by gender and workout type?</em></li>
+        <li>Sketch interface: two side-by-side bar charts, filters (workout subset, gender, age range), and a detailed table for precise numbers.</li>
+        <li>Implement incremental prototypes: load CSV → compute group aggregates → render basic bars → add transitions → add filters → polish styles and tooltip.</li>
+      </ol>
+      <p>Below are some of the sketches for this visualization: </p>
+      <img src="images/sketchone.png" alt="Initial design sketch">
+      <img src="images/sketchtwo.png" alt="Secondary table sketch">
+
+
+    </section>
+
+    <section>
+      <h2>Rationale for major design choices</h2>
+      <ul>
+        <li><strong>Bar charts grouped by workout</strong>: grouped bars (male/female) make gender comparisons by workout easy.</li>
+        <li><strong>Two charts (calories & bpm)</strong>: these are distinct measures (energy expenditure vs. heart rate), so separate charts avoid confusion.</li>
+        <li><strong>Filters</strong>: checkboxes for workout types (multi-select), radio for gender (all/male/female), and age sliders to narrow the sample.</li>
+        <li><strong>Color + legend</strong>: color + text legend (not color-only) to support accessibility.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Interactions & usage</h2>
+      <ol>
+        <li>Use the workout checkboxes to include/exclude workout types.</li>
+        <li>Use Gender radio to focus on Male, Female or All.</li>
+        <li>Use the Age sliders to limit to an age range (works only if Age column exists in CSV).</li>
+        <li>Hover bars to see precise values (tooltip); the detailed table updates with the selected filters.</li>
+      </ol>
+      <p>If the page fails to load data, open DevTools → Console to inspect errors. Testing has been completed on Chrome, Firefox, Google, and Microsoft Edge.</p>
+    </section>
+
+    <section>
+      <h2>Findings / Demonstration screenshots</h2>
+      <p>With no filters included, we can immediately see that men always burn more calories than women in all workouts. </p>
+      <img src="images/dem.png" alt="Demo screenshot">
+      <p>In this second demonstration, I filtered the graphs to age range of 20-30 and 40-50 to measure difference in beats per minute. The conclusion was the older age range has higher bpms, and they tend to prefer HIIT workouts.</p>
+      <img src="images/twenty.png" alt="20-30 Age Range">
+      <img src="images/fourty.png" alt="40-50 Age Range">
+    </section>
+   
+    </section>
+     <h2>Demo Video</h2>
+        <iframe width="560" height="315"
+            src="https://www.youtube.com"
+            title="Gym Excercise Tracking Visualization Demo"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen></iframe>
+     <section>
+   
+
+    <section>
+      <h2>Deployment & repository</h2>
+      <p>
+        I publish the visualization with GitHub Pages. The visualization is the root <code>index.html</code>, and the documentation is <code>documentation.html</code>.
+        <br/>Example published URL: <code>https://your-username.github.io/gym-visualization/</code>
+      </p>
+      <p><a class="btn" href="index.html">Open visualization (index.html)</a>
+         <a class="btn" href="documentation.html">Open documentation</a></p>
+    </section>
+
+    <section>
+      <h2>Troubleshooting</h2>
+      <ul>
+        <li><strong>CSV 404</strong>: ensure <code>/data/gym_members_exercise_tracking.csv</code> exists in the repo and was committed.</li>
+        <li><strong>CORS</strong>: GitHub Pages serves static files with correct headers; if hosting elsewhere, ensure CORS is allowed.</li>
+        <li><strong>Chart crashes</strong>: check the console for bad numbers or column name typos.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Credits</h2>
+      <p>Built with D3.js v7. Dataset source :https://www.kaggle.com/datasets/valakhorasani/gym-members-exercise-dataset?resource=download</p>
+    </section>
+
+  </div>
+</body>
+</html>

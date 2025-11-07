@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gym Exercise Trends - Gender Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Exercise Trends Dashboard: Gender Analysis</h1>
+        <p class="subtitle">Exploring workout patterns, intensity, and calorie burn across genders and exercise types</p>
+        
+        <!-- Filters Section -->
+        <div id="filters">
+            <h3>Filters:</h3>
+            <div id="workout-filters">
+                <label><input type="checkbox" class="workout-checkbox" value="HIIT" checked> HIIT</label>
+                <label><input type="checkbox" class="workout-checkbox" value="Cardio" checked> Cardio</label>
+                <label><input type="checkbox" class="workout-checkbox" value="Strength" checked> Strength</label>
+                <label><input type="checkbox" class="workout-checkbox" value="Yoga" checked> Yoga</label>
+            </div>
+            
+            <div id="gender-filter">
+                <label><input type="radio" class="gender-radio" name="gender" value="All" checked> All</label>
+                <label><input type="radio" class="gender-radio" name="gender" value="Male"> Male Only</label>
+                <label><input type="radio" class="gender-radio" name="gender" value="Female"> Female Only</label>
+            </div>
+            
+            <div id="age-filter">
+                <label for="age-slider"><strong>Age Range:</strong> <span id="age-display">18 - 60</span></label>
+                <input type="range" id="age-slider-min" min="18" max="60" value="18" step="1">
+                <input type="range" id="age-slider-max" min="18" max="60" value="60" step="1">
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-container">
+            <div class="chart-wrapper">
+                <h2>Average Calories Burned by Workout Type</h2>
+                <div id="calorie-chart"></div>
+            </div>
+            
+            <div class="chart-wrapper">
+                <h2>Average Max BPM by Workout Type</h2>
+                <div id="bpm-chart"></div>
+            </div>
+        </div>
+
+        <!-- Data Table Section -->
+        <div id="data-table">
+            <h2>Detailed Statistics</h2>
+            <table id="stats-table">
+                <thead>
+                    <tr>
+                        <th>Workout Type</th>
+                        <th>Male Avg Calories</th>
+                        <th>Female Avg Calories</th>
+                        <th>Male Avg BPM</th>
+                        <th>Female Avg BPM</th>
+                    </tr>
+                </thead>
+                <tbody id="stats-tbody">
+                    <!-- Data will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
