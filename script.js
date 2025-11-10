@@ -21,60 +21,52 @@ function toNumberSafe(v) {
   const n = +v;
   return isNaN(n) ? null : n;
 }
+
+// Load CSV and initialize everything
 d3.csv("data/gym_members_exercise_tracking.csv")
-  .then(function(data) {
-    console.log(data); // Check that data loaded correctly
-    // Your visualization code here
+  .then(function(rawData) {
+    console.log(rawData); // Check CSV loaded
+
+    // Parse numeric columns if they exist
+    rawData.forEach(d => {
+      d.Calories_Burned = toNumberSafe(d.Calories_Burned);
+      d.Max_BPM = toNumberSafe(d.Max_BPM);
+      const ageVal = toNumberSafe(d.Age);
+      if (ageVal !== null) d.Age = ageVal;
+      d.Workout_Type = (d.Workout_Type || "").trim();
+      d.Gender = (d.Gender || "").trim();
+    });
+
+    // Save original for filters
+    GLOBAL_RAW_DATA = rawData;
+
+    // Build initial aggregated data and render
+    const initial = aggregateData(rawData);
+    createCalorieChart(initial);
+    createBPMChart(initial);
+    populateTable(initial);
+
+    // Initialize filters UI
+    initFilters();
+
   })
-  .catch(function(error){
-    console.error("Failed to load CSV:", error);
+  .catch(err => {
+    console.error("Failed to load CSV:", err);
+    d3.select("#calorie-chart").append("div").text("Error loading data.");
+    d3.select("#bpm-chart").append("div").text("Error loading data.");
   });
-
-  // Parse numeric columns if they exist
-  rawData.forEach(d => {
-    // Names expected: Calories_Burned, Max_BPM, Age (optional)
-    d.Calories_Burned = toNumberSafe(d.Calories_Burned);
-    d.Max_BPM = toNumberSafe(d.Max_BPM);
-    // Optional Age column: if present, keep numeric, else undefined
-    const ageVal = toNumberSafe(d.Age);
-    if (ageVal !== null) d.Age = ageVal;
-    // Keep Workout_Type and Gender as-is (trim whitespace)
-    d.Workout_Type = (d.Workout_Type || "").trim();
-    d.Gender = (d.Gender || "").trim();
-  });
-
-  // Save original for filters
-  GLOBAL_RAW_DATA = rawData;
-
-  // Build initial aggregated data and render
-  const initial = aggregateData(rawData);
-  createCalorieChart(initial);
-  createBPMChart(initial);
-  populateTable(initial);
-
-  // Initialize filters UI
-  initFilters();
-
-}).catch(err => {
-  console.error("Failed to load CSV:", err);
-  d3.select("#calorie-chart").append("div").text("Error loading data.");
-  d3.select("#bpm-chart").append("div").text("Error loading data.");
-});
 
 /* ------------------------
    Data aggregation helper
    ------------------------ */
 function aggregateData(rows) {
-  // Group by Workout_Type and Gender
   const grouped = d3.group(rows, d => d.Workout_Type, d => d.Gender);
-
   const chartData = [];
 
   for (const [workout, genderMap] of grouped.entries()) {
     const maleList = genderMap.get("Male") || [];
     const femaleList = genderMap.get("Female") || [];
 
-    // Compute means using d3.mean but guard against nulls
     const maleCalories = d3.mean(maleList, d => d.Calories_Burned) || 0;
     const femaleCalories = d3.mean(femaleList, d => d.Calories_Burned) || 0;
     const maleBPM = d3.mean(maleList, d => d.Max_BPM) || 0;
@@ -89,7 +81,6 @@ function aggregateData(rows) {
     });
   }
 
-  // Ensure consistent order
   chartData.sort((a, b) => d3.ascending(a.workout, b.workout));
   return chartData;
 }
@@ -106,11 +97,9 @@ function createCalorieChart(data) {
     return;
   }
 
-  // Compute max for y (guard against 0)
   const maxCalories = d3.max(data, d => Math.max(d.maleCalories, d.femaleCalories)) || 0;
   const yMax = maxCalories > 0 ? maxCalories * 1.1 : 10;
 
-  // create svg with viewBox for scaling
   const svg = d3.select("#calorie-chart")
     .append("svg")
     .attr("viewBox", `0 0 ${innerWidth + margin.left + margin.right} ${innerHeight + margin.top + margin.bottom}`)
@@ -119,7 +108,6 @@ function createCalorieChart(data) {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // scales
   const x0 = d3.scaleBand()
     .domain(data.map(d => d.workout))
     .range([0, innerWidth])
@@ -135,12 +123,11 @@ function createCalorieChart(data) {
     .nice()
     .range([innerHeight, 0]);
 
-  // color scale (neutral names)
   const color = d3.scaleOrdinal()
     .domain(["Male", "Female"])
     .range(["#4caf50", "#ec407a"]);
 
-  // axes
+  // Axes
   svg.append("g")
     .attr("class", "x-axis")
     .attr("transform", `translate(0,${innerHeight})`)
@@ -158,7 +145,6 @@ function createCalorieChart(data) {
     .style("font-size", "12px")
     .style("fill", "#388e3c");
 
-  // Y axis label
   svg.append("text")
     .attr("transform", "rotate(-90)")
     .attr("y", -margin.left + 15)
@@ -169,14 +155,12 @@ function createCalorieChart(data) {
     .style("fill", "#2e7d32")
     .text("Average Calories Burned");
 
-  // Bars groups
   const groups = svg.selectAll(".workout-group")
     .data(data, d => d.workout)
     .enter().append("g")
     .attr("class", "workout-group")
     .attr("transform", d => `translate(${x0(d.workout)},0)`);
 
-  // Male bars
   groups.append("rect")
     .attr("class", "bar-male")
     .attr("x", x1("Male"))
@@ -190,7 +174,6 @@ function createCalorieChart(data) {
     .attr("y", d => y(d.maleCalories))
     .attr("height", d => innerHeight - y(d.maleCalories));
 
-  // Female bars
   groups.append("rect")
     .attr("class", "bar-female")
     .attr("x", x1("Female"))
@@ -205,7 +188,7 @@ function createCalorieChart(data) {
     .attr("y", d => y(d.femaleCalories))
     .attr("height", d => innerHeight - y(d.femaleCalories));
 
-  // Attach tooltip interactions (delegated by class)
+  // Tooltip interactions
   svg.selectAll(".bar-male, .bar-female")
     .on("mouseover", function(event, d) {
       const isMale = d3.select(this).classed("bar-male");
@@ -235,7 +218,6 @@ function createCalorieChart(data) {
   legend.append("text").attr("x", 30).attr("y", 41).attr("dy", ".35em").text("Female").style("fill", "#388e3c");
 }
 
-/* ------------------------
    Chart: Average Max BPM
    ------------------------ */
 function createBPMChart(data) {
