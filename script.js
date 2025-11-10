@@ -25,7 +25,7 @@ function toNumberSafe(v) {
 // Load CSV and initialize everything
 d3.csv("data/gym_members_exercise_tracking.csv")
   .then(function(rawData) {
-    console.log(rawData); // Check CSV loaded
+    console.log("CSV loaded:", rawData);
 
     // Parse numeric columns if they exist
     rawData.forEach(d => {
@@ -89,9 +89,7 @@ function aggregateData(rows) {
    Chart: Average Calories
    ------------------------ */
 function createCalorieChart(data) {
-  // Clear existing
   d3.select("#calorie-chart").selectAll("*").remove();
-
   if (!data || data.length === 0) {
     d3.select("#calorie-chart").append("div").style("padding", "30px").text("No data to display.");
     return;
@@ -188,7 +186,6 @@ function createCalorieChart(data) {
     .attr("y", d => y(d.femaleCalories))
     .attr("height", d => innerHeight - y(d.femaleCalories));
 
-  // Tooltip interactions
   svg.selectAll(".bar-male, .bar-female")
     .on("mouseover", function(event, d) {
       const isMale = d3.select(this).classed("bar-male");
@@ -205,25 +202,20 @@ function createCalorieChart(data) {
       hideTooltip();
     });
 
-  // Legend
   const legend = svg.append("g")
     .attr("transform", `translate(${innerWidth - 120}, -10)`);
 
-  legend.append("rect")
-    .attr("x", 0).attr("y", 0).attr("width", 22).attr("height", 22).attr("rx", 4).attr("fill", color("Male"));
+  legend.append("rect").attr("x", 0).attr("y", 0).attr("width", 22).attr("height", 22).attr("rx", 4).attr("fill", color("Male"));
   legend.append("text").attr("x", 30).attr("y", 11).attr("dy", ".35em").text("Male").style("fill", "#388e3c");
-
-  legend.append("rect")
-    .attr("x", 0).attr("y", 30).attr("width", 22).attr("height", 22).attr("rx", 4).attr("fill", color("Female"));
+  legend.append("rect").attr("x", 0).attr("y", 30).attr("width", 22).attr("height", 22).attr("rx", 4).attr("fill", color("Female"));
   legend.append("text").attr("x", 30).attr("y", 41).attr("dy", ".35em").text("Female").style("fill", "#388e3c");
 }
 
+/* ------------------------
    Chart: Average Max BPM
    ------------------------ */
 function createBPMChart(data) {
-  // Clear
   d3.select("#bpm-chart").selectAll("*").remove();
-
   if (!data || data.length === 0) {
     d3.select("#bpm-chart").append("div").style("padding", "30px").text("No data to display.");
     return;
@@ -256,8 +248,7 @@ function createBPMChart(data) {
   svg.append("g")
     .attr("transform", `translate(0,${innerHeight})`)
     .call(d3.axisBottom(x0))
-    .selectAll("text")
-    .attr("transform", "rotate(-45)").style("text-anchor", "end").style("fill", "#388e3c");
+    .selectAll("text").attr("transform", "rotate(-45)").style("text-anchor", "end").style("fill", "#388e3c");
 
   svg.append("g")
     .call(d3.axisLeft(y).ticks(8))
@@ -322,7 +313,6 @@ function createBPMChart(data) {
       hideTooltip();
     });
 
-  // Legend
   const legend = svg.append("g").attr("transform", `translate(${innerWidth - 120}, -10)`);
   legend.append("rect").attr("x", 0).attr("y", 0).attr("width", 22).attr("height", 22).attr("rx", 4).attr("fill", color("Male"));
   legend.append("text").attr("x", 30).attr("y", 11).attr("dy", ".35em").text("Male").style("fill", "#388e3c");
@@ -343,7 +333,6 @@ function populateTable(data) {
   }
 
   const rows = tbody.selectAll("tr").data(data, d => d.workout).enter().append("tr");
-
   rows.append("td").text(d => d.workout).style("font-weight", "600").style("color", "#2e7d32");
   rows.append("td").text(d => d.maleCalories.toFixed(1) + " cal");
   rows.append("td").text(d => d.femaleCalories.toFixed(1) + " cal");
@@ -375,16 +364,13 @@ function updateTooltipPosition(event) {
   const ttWidth = tooltipNode.offsetWidth;
   const ttHeight = tooltipNode.offsetHeight;
 
-  // Preferred location: right + slightly above cursor
   let left = event.pageX + marginGap;
   let top = event.pageY - (ttHeight / 2);
 
-  // Bound to viewport right edge
   const rightEdge = window.pageXOffset + window.innerWidth;
   if (left + ttWidth + 10 > rightEdge) {
     left = event.pageX - ttWidth - marginGap;
   }
-  // Bound to top/bottom
   if (top < window.pageYOffset + 10) top = window.pageYOffset + 10;
   if (top + ttHeight > window.pageYOffset + window.innerHeight - 10) top = window.pageYOffset + window.innerHeight - ttHeight - 10;
 
@@ -399,23 +385,17 @@ function hideTooltip() {
    Filters: init & apply
    ------------------------ */
 function initFilters() {
-  // Hook up workout checkboxes
   d3.selectAll(".workout-checkbox").on("change", applyFilters);
-
-  // Hook up gender radio buttons
   d3.selectAll(".gender-radio").on("change", applyFilters);
 
-  // Age sliders (if Age column present in dataset this will filter; otherwise age filters will be ignored)
   const minSlider = d3.select("#age-slider-min");
   const maxSlider = d3.select("#age-slider-max");
   const ageDisplay = d3.select("#age-display");
 
-  // Initialize display (makes sure sliders are consistent)
   function updateAgeText() {
     let minV = +minSlider.property("value");
     let maxV = +maxSlider.property("value");
     if (minV > maxV) {
-      // ensure min <= max by snapping the other handle
       if (this === minSlider.node()) {
         maxSlider.property("value", minV);
         maxV = minV;
@@ -427,55 +407,27 @@ function initFilters() {
     ageDisplay.text(`${minV} - ${maxV}`);
   }
 
-  minSlider.on("input", function() { updateAgeText.call(this); applyFilters(); });
-  maxSlider.on("input", function() { updateAgeText.call(this); applyFilters(); });
-
-  // initial call to set display text
-  updateAgeText.call(minSlider.node());
+  minSlider.on("input", function() { updateAgeText(); applyFilters(); });
+  maxSlider.on("input", function() { updateAgeText(); applyFilters(); });
 }
 
 function applyFilters() {
-  // Check selected workouts
-  const selectedWorkouts = [];
+  let selectedWorkouts = [];
   d3.selectAll(".workout-checkbox").each(function() {
-    const el = d3.select(this);
-    if (el.property("checked")) selectedWorkouts.push(el.property("value"));
+    const cb = d3.select(this);
+    if (cb.property("checked")) selectedWorkouts.push(cb.property("value"));
   });
 
-  // Gender
-  const genderChoice = d3.select('input[name="gender"]:checked').property("value");
+  const gender = d3.select('input[name="gender"]:checked').property("value");
+  const minAge = +d3.select("#age-slider-min").property("value");
+  const maxAge = +d3.select("#age-slider-max").property("value");
 
-  // Age range
-  const minAge = toNumberSafe(d3.select("#age-slider-min").property("value"));
-  const maxAge = toNumberSafe(d3.select("#age-slider-max").property("value"));
+  let filtered = GLOBAL_RAW_DATA.filter(d => selectedWorkouts.includes(d.Workout_Type));
+  if (gender !== "All") filtered = filtered.filter(d => d.Gender === gender);
+  filtered = filtered.filter(d => d.Age >= minAge && d.Age <= maxAge);
 
-  // Filter raw data
-  let filtered = GLOBAL_RAW_DATA.filter(d => {
-    // Workout filter
-    if (selectedWorkouts.length > 0 && !selectedWorkouts.includes(d.Workout_Type)) return false;
-    // Age filter only if Age exists for this row and sliders are meaningful
-    if (typeof d.Age !== "undefined" && minAge !== null && maxAge !== null) {
-      if (d.Age < minAge || d.Age > maxAge) return false;
-    }
-    // Gender filter (All means no filter)
-    if (genderChoice !== "All" && d.Gender !== genderChoice) return false;
-    return true;
-  });
-
-  // If nothing matches, clear charts and table and show messages
-  if (filtered.length === 0) {
-    d3.select("#calorie-chart").selectAll("*").remove();
-    d3.select("#bpm-chart").selectAll("*").remove();
-    d3.select("#stats-tbody").selectAll("*").remove();
-    d3.select("#calorie-chart").append("div").style("padding", "30px").text("No data for selected filters.");
-    d3.select("#bpm-chart").append("div").style("padding", "30px").text("No data for selected filters.");
-    d3.select("#stats-tbody").append("tr").append("td").attr("colspan", 5).text("No data for selected filters.");
-    return;
-  }
-
-  // Re-aggregate and redraw
-  const newAgg = aggregateData(filtered);
-  createCalorieChart(newAgg);
-  createBPMChart(newAgg);
-  populateTable(newAgg);
+  const aggData = aggregateData(filtered);
+  createCalorieChart(aggData);
+  createBPMChart(aggData);
+  populateTable(aggData);
 }
