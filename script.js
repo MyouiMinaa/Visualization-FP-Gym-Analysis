@@ -23,7 +23,7 @@ function toNumberSafe(v) {
 }
 
 // Load CSV and initialize everything
-d3.csv("data/gym_members_exercise_tracking.csv")
+d3.csv("Data/gym_members_exercise_tracking.csv")
   .then(function(rawData) {
     console.log("CSV loaded:", rawData);
 
