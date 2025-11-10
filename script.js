@@ -23,7 +23,7 @@ function toNumberSafe(v) {
 }
 
 // Load CSV data
-d3.csv("data/gym_members_exercise_tracking.csv").then(rawData => {
+d3.csv("/Visualization-FP-Gym-Analysis/data/gym_members_exercise_tracking.csv").then(rawData => {
   console.log("Data loaded:", rawData.length, "rows");
 
   // Parse numeric columns if they exist
