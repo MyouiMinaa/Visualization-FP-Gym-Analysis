@@ -21,10 +21,14 @@ function toNumberSafe(v) {
   const n = +v;
   return isNaN(n) ? null : n;
 }
-
-// Load CSV data
-d3.csv("/Visualization-FP-Gym-Analysis/data/gym_members_exercise_tracking.csv").then(rawData => {
-  console.log("Data loaded:", rawData.length, "rows");
+d3.csv("data/gym_members_exercise_tracking.csv")
+  .then(function(data) {
+    console.log(data); // Check that data loaded correctly
+    // Your visualization code here
+  })
+  .catch(function(error){
+    console.error("Failed to load CSV:", error);
+  });
 
   // Parse numeric columns if they exist
   rawData.forEach(d => {
